@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Task Parade | Recurring task tracker by Johanna Rayo</title>
+<meta name="description" content="Task Parade, an animated recurring task tracker designed and built by Johanna Rayo with Claude.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<script>if (window.self !== window.top) document.documentElement.classList.add('embedded');</script>
+<style>
+:root{
+  --bg:#FBF6FF; --surface:#FFFFFF; --surface-2:#F4ECFF; --ink:#3B2A55; --ink-soft:#7A6A95; --line:#E8DCFB;
+  --pink:#FF8FC7; --pink-soft:#FFE3F1; --lilac:#A98BFF; --lilac-soft:#EEE6FF;
+  --mint:#5CC9A0; --mint-soft:#DCF5EB; --butter:#F2B83B; --butter-soft:#FFF3D1;
+  --critter-line:#3B2A55;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#1C1530; --surface:#271E3F; --surface-2:#30264D; --ink:#F3EAFF; --ink-soft:#B9A9D6; --line:#3D3160;
+    --pink-soft:#4A2645; --lilac-soft:#382C5E; --mint-soft:#1F3F38; --butter-soft:#43391F;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1C1530; --surface:#271E3F; --surface-2:#30264D; --ink:#F3EAFF; --ink-soft:#B9A9D6; --line:#3D3160;
+  --pink-soft:#4A2645; --lilac-soft:#382C5E; --mint-soft:#1F3F38; --butter-soft:#43391F;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Nunito,"Segoe UI",system-ui,sans-serif;font-size:16px;line-height:1.5}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--lilac);outline-offset:2px;border-radius:10px}
+
+.back{display:inline-flex;align-items:center;gap:6px;margin-bottom:18px;font-size:14px;font-weight:700;color:var(--ink-soft);text-decoration:none;padding:5px 12px;border:2px solid var(--line);border-radius:999px;background:var(--surface)}
+.back:hover{color:var(--ink);border-color:var(--lilac)}
+.embedded .back{display:none}
+
+.app{max-width:1200px;margin:0 auto;padding:28px 20px 48px}
+.top{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-end;justify-content:space-between;margin-bottom:22px}
+.brand{display:flex;gap:14px;align-items:center}
+.brand-mark{width:58px;height:58px;flex:none}
+h1{font-family:Fredoka,Nunito,sans-serif;font-weight:600;font-size:40px;line-height:1;margin:0;letter-spacing:-.5px}
+.lede{margin:6px 0 0;color:var(--ink-soft);max-width:52ch}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+
+.btn{border:2px solid var(--ink);background:var(--pink);color:#3B2A55;border-radius:999px;padding:7px 16px;font-family:Fredoka,Nunito,sans-serif;font-weight:500;font-size:15px;cursor:pointer;box-shadow:0 3px 0 var(--ink);transition:transform .12s,box-shadow .12s}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn.ghost{background:var(--surface);color:var(--ink);border-color:var(--line);box-shadow:none}
+.btn.ghost:hover{border-color:var(--lilac)}
+.btn .count{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 5px;margin-left:4px;border-radius:99px;background:var(--surface);font-size:12px;font-family:Nunito,sans-serif;font-weight:700;color:var(--ink)}
+
+.switch{display:inline-flex;align-items:center;gap:8px;background:none;border:0;cursor:pointer;font-weight:700;padding:4px}
+.switch-track{width:46px;height:26px;border-radius:99px;background:var(--line);position:relative;transition:background .2s}
+.switch-track::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(59,42,85,.3);transition:transform .2s}
+.switch[aria-checked="true"] .switch-track{background:var(--lilac)}
+.switch[aria-checked="true"] .switch-track::after{transform:translateX(20px)}
+
+.stats{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 22px;padding:0;list-style:none}
+.stats li{display:flex;align-items:center;gap:8px;padding:6px 14px 6px 8px;border-radius:999px;background:var(--surface);border:2px solid var(--line);font-size:14px;color:var(--ink-soft)}
+.stats b{font-family:Fredoka,sans-serif;font-weight:600;font-size:18px;color:var(--ink)}
+.stats .ico{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:13px}
+
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:22px;align-items:start}
+@media (max-width:900px){.layout{grid-template-columns:1fr}}
+.lanes{display:grid;gap:16px}
+
+.lane{background:var(--surface);border:2px solid var(--line);border-radius:24px;padding:18px 20px 14px}
+.lane[data-state="done"]{border-color:var(--mint)}
+.lane[data-state="idle"]{border-color:var(--butter)}
+.lane-head{display:flex;gap:12px;justify-content:space-between;align-items:flex-start}
+.lane-title{font-family:Fredoka,sans-serif;font-weight:500;font-size:21px;line-height:1.2;margin:0}
+.lane-meta{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin:6px 0 0;font-size:14px;color:var(--ink-soft)}
+.chip{background:var(--lilac-soft);color:var(--ink);padding:1px 10px;border-radius:99px;font-weight:700;font-size:13px}
+.owner{display:inline-flex;align-items:center;gap:6px}
+.dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--critter-line);flex:none;display:inline-block}
+.pill{flex:none;padding:4px 12px;border-radius:99px;font-size:13px;font-weight:700;white-space:nowrap}
+.pill[data-state="active"]{background:var(--lilac-soft)}
+.pill[data-state="idle"]{background:var(--butter-soft)}
+.pill[data-state="done"]{background:var(--mint-soft)}
+.now{margin:10px 0 0;font-size:15px;min-height:1.5em}
+.now strong{font-weight:700}
+
+.track{position:relative;height:122px;margin:4px 0 6px}
+.road{position:absolute;left:20px;right:20px;bottom:34px;height:10px;border-radius:99px;background:var(--lilac-soft);overflow:hidden}
+.road-fill{height:100%;width:calc(var(--p) * 1%);background:repeating-linear-gradient(90deg,var(--pink) 0 14px,#FFB3D9 14px 22px);border-radius:99px;transition:width 1.2s linear}
+.lane[data-state="done"] .road-fill{background:var(--mint)}
+.stop{position:absolute;bottom:0;left:calc(20px + (100% - 40px) * var(--at) / 100);width:0}
+.stop-dot{position:absolute;bottom:32px;left:-7px;width:14px;height:14px;border-radius:50%;background:var(--surface);border:2px solid var(--line);transition:background .3s,border-color .3s}
+.stop.reached .stop-dot{background:var(--pink);border-color:var(--critter-line)}
+.stop-label{position:absolute;bottom:4px;left:0;transform:translateX(-50%);white-space:nowrap;font-size:12px;font-weight:700;color:var(--ink-soft)}
+.stop:first-of-type .stop-label{transform:translateX(-20px)}
+.stop.reached .stop-label{color:var(--ink)}
+.stop-flag{position:absolute;bottom:38px;left:-3px;width:24px;height:34px}
+
+.critter{position:absolute;bottom:36px;width:56px;height:64px;padding:0;border:0;background:none;cursor:pointer;
+  left:calc(20px + (100% - 40px) * var(--p) / 100 - 28px);transition:left 1.2s linear;z-index:2;border-radius:16px}
+.critter-svg{width:100%;height:100%;display:block;overflow:visible;transition:transform .2s}
+.face-left .critter-svg{transform:scaleX(-1)}
+.critter-svg .body,.critter-svg .leg{transform-box:fill-box;transform-origin:50% 100%}
+.eyes-closed,.eyes-happy,.nightcap{display:none}
+.is-sleeping .eyes-open,.is-done .eyes-open{display:none}
+.is-sleeping .eyes-closed,.is-sleeping .nightcap,.is-done .eyes-happy{display:inline}
+
+.is-walking .body{animation:bob .45s ease-in-out infinite}
+.is-walking .leg-l{animation:step .45s ease-in-out infinite}
+.is-walking .leg-r{animation:step .45s ease-in-out infinite .225s}
+.is-working .body{animation:wiggle 1.6s ease-in-out infinite}
+.is-sleeping .body{animation:breathe 3.2s ease-in-out infinite}
+.is-done .body{animation:hop 1s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-3px)}}
+@keyframes step{50%{transform:translateY(-4px)}}
+@keyframes wiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-3deg)}75%{transform:rotate(3deg)}}
+@keyframes breathe{50%{transform:scale(1.03,.95)}}
+@keyframes hop{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-10px)}}
+
+.bubble{position:absolute;left:50%;top:-18px;transform:translateX(-50%);opacity:0;pointer-events:none;transition:opacity .25s;font-family:Fredoka,sans-serif;font-weight:600;color:var(--ink)}
+.zzz{left:70%;display:flex;gap:1px;font-size:14px}
+.zzz i{font-style:normal;animation:float 2.4s ease-in-out infinite;color:var(--lilac)}
+.zzz i:nth-child(2){animation-delay:.4s;font-size:16px}
+.zzz i:nth-child(3){animation-delay:.8s;font-size:19px}
+.is-sleeping .zzz{opacity:1}
+.dots{display:flex;gap:3px;background:var(--surface);border:2px solid var(--line);border-radius:12px;padding:5px 7px}
+.dots i{width:5px;height:5px;border-radius:50%;background:var(--lilac);animation:blink 1.2s infinite}
+.dots i:nth-child(2){animation-delay:.2s}.dots i:nth-child(3){animation-delay:.4s}
+.is-working .dots{opacity:1}
+.hearts{color:var(--pink);font-size:20px;animation:float 1.6s ease-in-out infinite}
+.is-done .hearts{opacity:1}
+.poke{font-size:22px;color:var(--pink)}
+.poked .poke{animation:pop .9s ease-out forwards}
+.poked .zzz,.poked .dots,.poked .hearts{opacity:0}
+@keyframes float{0%,100%{transform:translateY(0);opacity:.5}50%{transform:translateY(-6px);opacity:1}}
+@keyframes blink{0%,100%{opacity:.3}50%{opacity:1}}
+@keyframes pop{0%{opacity:0;transform:translate(-50%,6px) scale(.5)}30%{opacity:1;transform:translate(-50%,-4px) scale(1.2)}100%{opacity:0;transform:translate(-50%,-14px) scale(1)}}
+.confetti{position:absolute;left:50%;top:40%;width:7px;height:7px;border-radius:2px;pointer-events:none;animation:burst 1s ease-out forwards}
+@keyframes burst{to{transform:translate(var(--dx),var(--dy)) rotate(260deg);opacity:0}}
+
+.lane-foot{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.progress-text{font-size:14px;color:var(--ink-soft);font-weight:700}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.actions .btn{padding:5px 13px;font-size:14px}
+
+.feed{background:var(--surface);border:2px solid var(--line);border-radius:24px;padding:18px;position:sticky;top:calc(16px + env(safe-area-inset-top,0px))}
+.feed h2{font-family:Fredoka,sans-serif;font-weight:500;font-size:20px;margin:0 0 4px}
+.feed .sub{margin:0 0 12px;font-size:14px;color:var(--ink-soft)}
+.feed ul{list-style:none;margin:0;padding:0;display:grid;gap:10px;max-height:560px;overflow:auto}
+.feed li{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.4}
+.feed li .dot{margin-top:4px}
+.feed time{display:block;font-size:12px;color:var(--ink-soft)}
+.empty{color:var(--ink-soft);font-size:14px}
+
+/* notes drawer */
+.overlay{position:fixed;inset:0;background:rgba(40,25,70,.35);opacity:0;pointer-events:none;transition:opacity .25s;z-index:20}
+.overlay.open{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(420px,100%);background:var(--surface);border-left:2px solid var(--line);z-index:21;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s ease;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.drawer.open{transform:none}
+.drawer-head{display:flex;gap:12px;align-items:center;padding:16px 18px;border-bottom:2px solid var(--line)}
+.drawer-head .avatar{width:46px;height:52px;flex:none}
+.drawer-head h2{font-family:Fredoka,sans-serif;font-weight:500;font-size:18px;margin:0;line-height:1.2}
+.drawer-head p{margin:2px 0 0;font-size:13px;color:var(--ink-soft)}
+.close{margin-left:auto;width:36px;height:36px;border-radius:50%;border:2px solid var(--line);background:var(--surface);cursor:pointer;font-size:18px;line-height:1}
+.thread{flex:1;overflow:auto;padding:18px;display:flex;flex-direction:column;gap:12px;background:var(--bg)}
+.msg{max-width:82%;display:flex;gap:8px;align-items:flex-end}
+.msg .bubble-text{padding:9px 13px;border-radius:18px;font-size:15px;line-height:1.4;word-wrap:break-word}
+.msg.you{align-self:flex-end;flex-direction:row-reverse}
+.msg.you .bubble-text{background:var(--pink-soft);border-bottom-right-radius:6px}
+.msg.char .bubble-text{background:var(--surface);border:2px solid var(--line);border-bottom-left-radius:6px}
+.msg .mini{width:30px;height:34px;flex:none}
+.msg .tag{display:block;font-size:11px;font-weight:700;color:var(--ink-soft);margin-bottom:2px}
+.msg time{display:block;font-size:11px;color:var(--ink-soft);margin-top:3px}
+.typing .bubble-text{display:flex;gap:4px;padding:12px 14px}
+.typing i{width:6px;height:6px;border-radius:50%;background:var(--lilac);animation:blink 1.2s infinite}
+.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+.composer{border-top:2px solid var(--line);padding:12px 16px 16px;display:grid;gap:10px}
+.tags{display:flex;gap:6px}
+.tag-btn{border:2px solid var(--line);background:var(--surface);border-radius:99px;padding:3px 12px;font-size:13px;font-weight:700;cursor:pointer}
+.tag-btn[aria-pressed="true"]{background:var(--lilac-soft);border-color:var(--lilac)}
+.compose-row{display:flex;gap:8px}
+.compose-row textarea{flex:1;resize:none;height:46px;border:2px solid var(--line);border-radius:16px;padding:10px 12px;font:inherit;font-size:15px;background:var(--surface);color:var(--ink)}
+.compose-row textarea:focus{outline:none;border-color:var(--lilac)}
+.hint{margin:0;font-size:12px;color:var(--ink-soft)}
+
+dialog{border:2px solid var(--line);border-radius:24px;padding:0;background:var(--surface);color:var(--ink);width:min(440px,calc(100% - 32px))}
+dialog::backdrop{background:rgba(40,25,70,.4)}
+.dialog-body{padding:22px;display:grid;gap:14px}
+.dialog-body h2{font-family:Fredoka,sans-serif;font-weight:500;margin:0;font-size:22px}
+label{display:grid;gap:4px;font-weight:700;font-size:14px}
+label small{font-weight:400;color:var(--ink-soft)}
+input,select,.dialog-body textarea{font:inherit;font-weight:400;border:2px solid var(--line);border-radius:12px;padding:8px 10px;background:var(--surface);color:var(--ink)}
+.dialog-actions{display:flex;justify-content:flex-end;gap:8px}
+
+.foot-note{margin-top:28px;font-size:13px;color:var(--ink-soft);text-align:center}
+
+@media (max-width:560px){
+  h1{font-size:32px}
+  .stop-label{font-size:11px}
+  .lane{padding:16px 14px 12px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition-duration:.01ms!important}
+  .is-sleeping .zzz,.is-working .dots,.is-done .hearts{opacity:1}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <a class="back" href="/">← Back to Johanna’s portfolio</a>
+  <header class="top">
+    <div class="brand">
+      <div class="brand-mark is-working" id="brandMark"></div>
+      <div>
+        <h1>Task Parade</h1>
+        <p class="lede">Five recurring tasks, five little helpers. Each one walks its task from start to done, naps when it’s waiting on something, and starts over when the next cycle comes around.</p>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="switch" id="autoBtn" role="switch" aria-checked="true"><span class="switch-track"></span>Auto-run</button>
+      <button class="btn" id="addBtn">Add task</button>
+      <button class="btn ghost" id="resetBtn">Reset demo</button>
+    </div>
+  </header>
+
+  <ul class="stats" id="stats" aria-live="polite"></ul>
+
+  <div class="layout">
+    <main class="lanes" id="lanes" aria-label="Tasks"></main>
+    <aside class="feed" aria-label="Activity">
+      <h2>Activity</h2>
+      <p class="sub">What the team has been up to</p>
+      <ul id="log"></ul>
+    </aside>
+  </div>
+
+  <p class="foot-note">Tip: poke a sleeping helper to wake them up, or open Notes to leave a message.</p>
+</div>
+
+<div class="overlay" id="overlay"></div>
+<section class="drawer" id="drawer" aria-hidden="true" aria-labelledby="drawerTitle">
+  <div class="drawer-head">
+    <div class="avatar" id="drawerAvatar"></div>
+    <div>
+      <h2 id="drawerTitle">Notes</h2>
+      <p id="drawerSub"></p>
+    </div>
+    <button class="close" id="closeDrawer" aria-label="Close notes">×</button>
+  </div>
+  <div class="thread" id="thread" aria-live="polite"></div>
+  <div class="composer">
+    <div class="tags" role="group" aria-label="Message type">
+      <button class="tag-btn" data-tag="note" aria-pressed="true">Note</button>
+      <button class="tag-btn" data-tag="update" aria-pressed="false">Update</button>
+      <button class="tag-btn" data-tag="blocker" aria-pressed="false">Blocker</button>
+    </div>
+    <div class="compose-row">
+      <textarea id="msgInput" placeholder="Write a note…" aria-label="Message"></textarea>
+      <button class="btn" id="sendBtn">Send</button>
+    </div>
+    <p class="hint">A blocker pauses the task. An update wakes a napping helper.</p>
+  </div>
+</section>
+
+<dialog id="addDialog">
+  <form class="dialog-body" id="addForm">
+    <h2>Add a recurring task</h2>
+    <label>Task name<input id="fTitle" required maxlength="60" placeholder="Weekly inbox cleanup"></label>
+    <label>Who’s in charge<select id="fOwner"></select></label>
+    <label>How often<select id="fCadence"><option>Daily</option><option selected>Weekly</option><option>Biweekly</option><option>Monthly</option></select></label>
+    <label>Steps <small>One per line. Leave empty for default steps.</small><textarea id="fSteps" rows="4"></textarea></label>
+    <div class="dialog-actions">
+      <button type="button" class="btn ghost" id="cancelAdd">Cancel</button>
+      <button type="submit" class="btn">Add task</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+const CHARS = {
+  mimi:  {name:'Mimi',  species:'bunny', color:'#FFB8DA'},
+  lulu:  {name:'Lulu',  species:'bear',  color:'#CDB8FF'},
+  poppy: {name:'Poppy', species:'kitty', color:'#F2B0E6'},
+  kiko:  {name:'Kiko',  species:'lamb',  color:'#FFD6EC'},
+  nori:  {name:'Nori',  species:'seal',  color:'#D9CCFF'}
+};
+const STOPS = [{at:0,label:'Start'},{at:35,label:'In progress'},{at:70,label:'Review'},{at:100,label:'Done'}];
+const NAP_REASONS = ['Waiting on approval','Waiting for a reply','Needs more info','On a lunch break'];
+const KEY = 'task-parade-v1';
+const LINE = '#3B2A55';
+
+const REPLIES = {
+  note:    ['Noted! I’ll keep that in mind 💜','Got it, it’s on my clipboard now.','Thanks! I’ll remember that.'],
+  update:  ['Thanks for the update! Moving along 🐾','Yay, that helps a lot!','Perfect, back to it!'],
+  blocker: ['Oh no. I’ll nap here until it’s sorted 💤','Pausing until someone unblocks me.','Okay, I’ll wait right here.']
+};
+
+let S, auto = true, current = null, curTag = 'note';
+const timers = {};
+const $ = s => document.querySelector(s);
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = t => new Date(t).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+const ago = m => Date.now() - m*60000;
+
+/* ---------- characters ---------- */
+function critterSVG(c){
+  const col = c.color, s = 'stroke="'+LINE+'" stroke-width="2"';
+  let back = '', front = '', bodyRx = 22;
+  if (c.species === 'bunny'){
+    back = `<ellipse cx="23" cy="14" rx="5.5" ry="13" fill="${col}" ${s} transform="rotate(-10 23 14)"/>
+            <ellipse cx="23" cy="15" rx="2.4" ry="8" fill="#FF8FC7" opacity=".45" transform="rotate(-10 23 15)"/>
+            <ellipse cx="41" cy="14" rx="5.5" ry="13" fill="${col}" ${s} transform="rotate(10 41 14)"/>
+            <ellipse cx="41" cy="15" rx="2.4" ry="8" fill="#FF8FC7" opacity=".45" transform="rotate(10 41 15)"/>`;
+  } else if (c.species === 'bear'){
+    back = `<circle cx="14" cy="23" r="7.5" fill="${col}" ${s}/><circle cx="14" cy="23" r="3.5" fill="#FF8FC7" opacity=".45"/>
+            <circle cx="50" cy="23" r="7.5" fill="${col}" ${s}/><circle cx="50" cy="23" r="3.5" fill="#FF8FC7" opacity=".45"/>`;
+    front = `<ellipse cx="32" cy="44" rx="7" ry="5" fill="#fff" opacity=".55"/>`;
+  } else if (c.species === 'kitty'){
+    back = `<path d="M12 30 L15 9 L29 21 Z" fill="${col}" ${s} stroke-linejoin="round"/>
+            <path d="M52 30 L49 9 L35 21 Z" fill="${col}" ${s} stroke-linejoin="round"/>`;
+    front = `<path d="M9 40 h6 M9 44 h6 M49 40 h6 M49 44 h6" stroke="${LINE}" stroke-width="1.4" stroke-linecap="round" opacity=".5"/>`;
+  } else if (c.species === 'lamb'){
+    back = `<ellipse cx="10" cy="34" rx="7" ry="3.5" fill="${col}" ${s} transform="rotate(20 10 34)"/>
+            <ellipse cx="54" cy="34" rx="7" ry="3.5" fill="${col}" ${s} transform="rotate(-20 54 34)"/>`;
+    front = `<g fill="#FFF3FA" ${s}><circle cx="20" cy="23" r="6"/><circle cx="28" cy="19" r="6.5"/><circle cx="37" cy="19" r="6.5"/><circle cx="45" cy="23" r="6"/></g>`;
+  } else if (c.species === 'seal'){
+    bodyRx = 24;
+    back = `<ellipse cx="9" cy="47" rx="6" ry="3.5" fill="${col}" ${s} transform="rotate(30 9 47)"/>
+            <ellipse cx="55" cy="47" rx="6" ry="3.5" fill="${col}" ${s} transform="rotate(-30 55 47)"/>`;
+    front = `<circle cx="32" cy="41" r="1.6" fill="${LINE}"/>`;
+  }
+  return `<svg viewBox="0 0 64 64" class="critter-svg" aria-hidden="true">
+    <ellipse cx="32" cy="61.5" rx="15" ry="2.4" fill="${LINE}" opacity=".12"/>
+    <ellipse class="leg leg-l" cx="24" cy="56" rx="5" ry="3.8" fill="${col}" ${s}/>
+    <ellipse class="leg leg-r" cx="40" cy="56" rx="5" ry="3.8" fill="${col}" ${s}/>
+    <g class="body">
+      ${back}
+      <ellipse cx="32" cy="38" rx="${bodyRx}" ry="19" fill="${col}" ${s}/>
+      ${front}
+      <g class="eyes-open"><circle cx="24" cy="37" r="2.9" fill="${LINE}"/><circle cx="25" cy="36" r=".95" fill="#fff"/>
+        <circle cx="40" cy="37" r="2.9" fill="${LINE}"/><circle cx="41" cy="36" r=".95" fill="#fff"/></g>
+      <g class="eyes-closed" fill="none" stroke="${LINE}" stroke-width="1.8" stroke-linecap="round"><path d="M21 37 q3 2.6 6 0"/><path d="M37 37 q3 2.6 6 0"/></g>
+      <g class="eyes-happy" fill="none" stroke="${LINE}" stroke-width="1.8" stroke-linecap="round"><path d="M21 38 q3 -3.2 6 0"/><path d="M37 38 q3 -3.2 6 0"/></g>
+      <ellipse cx="18.5" cy="43" rx="3.4" ry="2" fill="#FF8FC7" opacity=".55"/>
+      <ellipse cx="45.5" cy="43" rx="3.4" ry="2" fill="#FF8FC7" opacity=".55"/>
+      <path d="M29 42.5 q1.5 1.7 3 0 q1.5 1.7 3 0" fill="none" stroke="${LINE}" stroke-width="1.5" stroke-linecap="round"/>
+      <g class="nightcap"><path d="M15 27 Q31 17 47 23 Q52 12 58 9 Q38 4 15 27 Z" fill="#A98BFF" ${s} stroke-linejoin="round"/>
+        <circle cx="58" cy="9" r="3.6" fill="#fff" ${s}/></g>
+    </g>
+  </svg>`;
+}
+const FLAG = `<svg class="stop-flag" viewBox="0 0 24 34" aria-hidden="true"><path d="M4 2 V33" stroke="${LINE}" stroke-width="2" stroke-linecap="round"/><path d="M5 3 L21 8 L5 14 Z" fill="#FF8FC7" stroke="${LINE}" stroke-width="2" stroke-linejoin="round"/></svg>`;
+
+/* ---------- state ---------- */
+function seed(){
+  const T = (id,title,owner,cadence,progress,state,steps,extra={}) =>
+    Object.assign({id,title,owner,cadence,progress,state,steps,cycle:1,notes:[],idleReason:null,idleLeft:0,doneTicks:0,faceLeft:false}, extra);
+  return {
+    finished: 0,
+    tasks: [
+      T('t1','Weekly facilitator schedule sync','mimi','Weekly',48,'active',
+        ['Collect availability forms','Match people to sessions','Resolve conflicts','Send calendar invites','Confirm replies'],
+        {cycle:12, notes:[{from:'you',tag:'note',text:'Prioritize the Saturday cohorts this week.',t:ago(90)},{from:'char',text:'On it! Saturdays first 🐰',t:ago(89)}]}),
+      T('t2','Monthly timesheet and invoice review','lulu','Monthly',22,'idle',
+        ['Gather timesheets','Check hours against the schedule','Flag discrepancies','Prepare invoice summary','Send for approval'],
+        {cycle:4, idleReason:'Waiting on timesheets', idleLeft:6,
+         notes:[{from:'you',tag:'blocker',text:'Two facilitators haven’t sent their timesheets yet.',t:ago(40)},{from:'char',text:'I’ll nap here until they come in 💤',t:ago(39)}]}),
+      T('t3','Session attendance report','poppy','Weekly',78,'active',
+        ['Export attendance','Clean up the data','Spot drop-off trends','Write the summary','Share with the program lead'],{cycle:12}),
+      T('t4','New-hire onboarding packets','kiko','Biweekly',100,'done',
+        ['Pull the new-hire list','Prepare the welcome kit','Set up tool accounts','Book orientation call','Send the packet'],{cycle:6, doneTicks:2}),
+      T('t5','Social content calendar','nori','Weekly',8,'active',
+        ['Brainstorm themes','Draft captions','Design graphics','Schedule posts','Review engagement'],{cycle:12})
+    ],
+    log: [
+      {t:ago(3), owner:'kiko', text:'finished “New-hire onboarding packets” 🎉'},
+      {t:ago(12), owner:'lulu', text:'is napping: waiting on timesheets'},
+      {t:ago(25), owner:'poppy', text:'moved “Session attendance report” to Review'},
+      {t:ago(60), owner:'nori', text:'started cycle 12 of “Social content calendar”'}
+    ]
+  };
+}
+function load(){
+  try { const raw = localStorage.getItem(KEY); if (raw){ S = JSON.parse(raw); return; } } catch(e){}
+  S = seed();
+}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }
+const task = id => S.tasks.find(t => t.id === id);
+const stageOf = p => p >= 100 ? 'Done' : p >= 70 ? 'Review' : p >= 35 ? 'In progress' : 'Start';
+const stepIdx = t => Math.min(t.steps.length-1, Math.floor(t.progress/100*t.steps.length));
+
+/* ---------- lanes ---------- */
+function buildLane(t){
+  const c = CHARS[t.owner];
+  const el = document.createElement('article');
+  el.className = 'lane'; el.dataset.id = t.id;
+  el.innerHTML = `
+    <div class="lane-head">
+      <div>
+        <h3 class="lane-title">${esc(t.title)}</h3>
+        <p class="lane-meta"><span class="chip">${esc(t.cadence)}</span>
+          <span class="owner"><span class="dot" style="background:${c.color}"></span>${c.name} the ${c.species}</span>
+          <span class="cycle"></span></p>
+      </div>
+      <span class="pill"></span>
+    </div>
+    <p class="now"></p>
+    <div class="track">
+      <div class="road"><div class="road-fill"></div></div>
+      ${STOPS.map(s => `<div class="stop" data-at="${s.at}" style="--at:${s.at}">${s.at===100 ? FLAG : '<span class="stop-dot"></span>'}<span class="stop-label">${s.label}</span></div>`).join('')}
+      <button class="critter" type="button" aria-label="Poke ${c.name}">
+        <span class="bubble zzz" aria-hidden="true"><i>z</i><i>z</i><i>Z</i></span>
+        <span class="bubble dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="bubble hearts" aria-hidden="true">♥</span>
+        <span class="bubble poke" aria-hidden="true"></span>
+        ${critterSVG(c)}
+      </button>
+    </div>
+    <div class="lane-foot">
+      <span class="progress-text"></span>
+      <div class="actions">
+        <button class="btn ghost" data-act="bump">+10%</button>
+        <button class="btn ghost" data-act="pause"></button>
+        <button class="btn" data-act="notes">Notes<span class="count"></span></button>
+      </div>
+    </div>`;
+  return el;
+}
+function laneEl(t){ return document.querySelector(`.lane[data-id="${t.id}"]`); }
+function updateLane(t){
+  const el = laneEl(t); if (!el) return;
+  const c = CHARS[t.owner];
+  el.dataset.state = t.state;
+  el.style.setProperty('--p', t.progress);
+  const vis = t.state === 'idle' ? 'sleeping' : t.state === 'done' ? 'done' : (timers[t.id] ? 'walking' : 'working');
+  const cr = el.querySelector('.critter');
+  cr.classList.remove('is-walking','is-working','is-sleeping','is-done');
+  cr.classList.add('is-'+vis);
+  cr.classList.toggle('face-left', !!t.faceLeft);
+  const pill = el.querySelector('.pill');
+  pill.dataset.state = t.state;
+  pill.textContent = t.state === 'idle' ? 'Napping' : t.state === 'done' ? 'Done' : stageOf(t.progress);
+  const i = stepIdx(t);
+  el.querySelector('.now').innerHTML =
+    t.state === 'idle' ? `💤 <strong>Paused:</strong> ${esc(t.idleReason)}` :
+    t.state === 'done' ? `✨ All ${t.steps.length} steps finished. ${c.name} restarts for the next cycle soon.` :
+    `<strong>Now:</strong> ${esc(t.steps[i])}`;
+  el.querySelector('.progress-text').textContent =
+    t.state === 'done' ? 'Complete, 100%' : `Step ${i+1} of ${t.steps.length}, ${Math.round(t.progress)}%`;
+  el.querySelector('.cycle').textContent = `Cycle ${t.cycle}`;
+  const pb = el.querySelector('[data-act="pause"]');
+  pb.textContent = t.state === 'idle' ? 'Wake up' : 'Pause';
+  pb.disabled = t.state === 'done';
+  el.querySelector('[data-act="bump"]').disabled = t.state !== 'active';
+  el.querySelector('.count').textContent = t.notes.length;
+  el.querySelectorAll('.stop').forEach(s => s.classList.toggle('reached', t.progress >= +s.dataset.at));
+}
+function renderAll(){
+  const box = $('#lanes'); box.innerHTML = '';
+  S.tasks.forEach(t => { box.appendChild(buildLane(t)); updateLane(t); });
+  renderStats(); renderLog();
+}
+
+/* ---------- actions ---------- */
+function log(t, text){
+  S.log.unshift({t:Date.now(), owner:t.owner, text});
+  S.log = S.log.slice(0, 40);
+  renderLog();
+}
+function markWalking(t){
+  clearTimeout(timers[t.id]);
+  timers[t.id] = setTimeout(() => { delete timers[t.id]; t.faceLeft = false; updateLane(t); }, 1250);
+}
+function moveTo(t, p){
+  const old = t.progress;
+  p = Math.max(0, Math.min(100, p));
+  if (p === old) return;
+  t.faceLeft = p < old;
+  t.progress = p;
+  markWalking(t);
+  if (p > old && p < 100 && stageOf(old) !== stageOf(p)) log(t, `moved “${t.title}” to ${stageOf(p)}`);
+  if (p >= 100) finish(t);
+}
+function finish(t){
+  t.state = 'done'; t.doneTicks = 0; S.finished++;
+  log(t, `finished “${t.title}” 🎉`);
+  setTimeout(() => confetti(t), 1100);
+}
+function nap(t, reason, ticks){
+  t.state = 'idle'; t.idleReason = reason; t.idleLeft = ticks;
+  log(t, `is napping: ${reason.charAt(0).toLowerCase() + reason.slice(1)}`);
+}
+function wake(t, msg){
+  t.state = 'active'; t.idleReason = null; t.idleLeft = 0;
+  log(t, msg || 'woke up and got back to work');
+}
+function confetti(t){
+  const cr = laneEl(t)?.querySelector('.critter'); if (!cr) return;
+  const cols = ['#FF8FC7','#A98BFF','#FFD66B','#7FD8B6','#FFB8DA'];
+  for (let k = 0; k < 14; k++){
+    const b = document.createElement('span');
+    b.className = 'confetti';
+    const a = Math.random()*Math.PI*2, d = 30 + Math.random()*35;
+    b.style.setProperty('--dx', Math.cos(a)*d+'px');
+    b.style.setProperty('--dy', (Math.sin(a)*d - 20)+'px');
+    b.style.background = cols[k % cols.length];
+    cr.appendChild(b);
+    setTimeout(() => b.remove(), 1000);
+  }
+}
+function poke(t, symbol){
+  const cr = laneEl(t).querySelector('.critter');
+  cr.querySelector('.poke').textContent = symbol;
+  cr.classList.remove('poked'); void cr.offsetWidth; cr.classList.add('poked');
+  setTimeout(() => cr.classList.remove('poked'), 900);
+}
+
+function tick(){
+  S.tasks.forEach(t => {
+    if (t.state === 'done'){
+      if (++t.doneTicks >= 6){
+        t.cycle++; t.state = 'active'; t.doneTicks = 0;
+        moveTo(t, 0);
+        log(t, `started cycle ${t.cycle} of “${t.title}”`);
+      }
+    } else if (t.state === 'idle'){
+      if (t.idleLeft > 0 && --t.idleLeft === 0) wake(t, 'is back from a nap');
+    } else {
+      if (Math.random() < 0.035 && t.progress > 5 && t.progress < 92) nap(t, pick(NAP_REASONS), 4 + Math.floor(Math.random()*4));
+      else { const g = pick([0,0,2,3,4,6]); if (g) moveTo(t, t.progress + g); }
+    }
+    updateLane(t);
+  });
+  renderStats(); save();
+}
+
+/* ---------- stats & feed ---------- */
+function renderStats(){
+  const n = s => S.tasks.filter(t => t.state === s).length;
+  const avg = S.tasks.length ? Math.round(S.tasks.reduce((a,t) => a + t.progress, 0) / S.tasks.length) : 0;
+  $('#stats').innerHTML = `
+    <li><span class="ico" style="background:var(--lilac-soft)">🐾</span><b>${n('active')}</b> working</li>
+    <li><span class="ico" style="background:var(--butter-soft)">💤</span><b>${n('idle')}</b> napping</li>
+    <li><span class="ico" style="background:var(--mint-soft)">✨</span><b>${n('done')}</b> done</li>
+    <li><span class="ico" style="background:var(--pink-soft)">🎉</span><b>${S.finished}</b> finished this session</li>
+    <li><span class="ico" style="background:var(--surface-2)">📈</span><b>${avg}%</b> average progress</li>`;
+}
+function renderLog(){
+  const ul = $('#log');
+  if (!S.log.length){ ul.innerHTML = '<li class="empty">Nothing yet. Turn on auto-run to get the team moving.</li>'; return; }
+  ul.innerHTML = S.log.slice(0, 20).map(e => {
+    const c = CHARS[e.owner] || CHARS.mimi;
+    return `<li><span class="dot" style="background:${c.color}"></span><div><b>${c.name}</b> ${esc(e.text)}<time>${fmt(e.t)}</time></div></li>`;
+  }).join('');
+}
+
+/* ---------- notes drawer ---------- */
+function openNotes(id){
+  const t = task(id); if (!t) return;
+  current = id;
+  const c = CHARS[t.owner];
+  $('#drawerAvatar').innerHTML = critterSVG(c);
+  $('#drawerTitle').textContent = t.title;
+  $('#drawerSub').textContent = `Notes with ${c.name} the ${c.species}`;
+  $('#msgInput').placeholder = `Write a note for ${c.name}…`;
+  renderThread();
+  $('#drawer').classList.add('open'); $('#drawer').setAttribute('aria-hidden','false');
+  $('#overlay').classList.add('open');
+  setTimeout(() => $('#msgInput').focus(), 300);
+}
+function closeNotes(){
+  $('#drawer').classList.remove('open'); $('#drawer').setAttribute('aria-hidden','true');
+  $('#overlay').classList.remove('open');
+  const t = task(current); current = null;
+  if (t) laneEl(t)?.querySelector('[data-act="notes"]').focus();
+}
+function renderThread(typing){
+  const t = task(current); if (!t) return;
+  const c = CHARS[t.owner];
+  const th = $('#thread');
+  const mini = `<div class="mini">${critterSVG(c)}</div>`;
+  const label = {note:'Note', update:'Update', blocker:'Blocker'};
+  let html = t.notes.length ? t.notes.map(m => m.from === 'you'
+      ? `<div class="msg you"><div class="bubble-text"><span class="tag">${label[m.tag] || 'Note'}</span>${esc(m.text)}<time>${fmt(m.t)}</time></div></div>`
+      : `<div class="msg char">${mini}<div class="bubble-text">${esc(m.text)}<time>${fmt(m.t)}</time></div></div>`).join('')
+    : `<p class="empty">No notes yet. Leave ${c.name} a note, an update or a blocker.</p>`;
+  if (typing) html += `<div class="msg char typing">${mini}<div class="bubble-text"><i></i><i></i><i></i></div></div>`;
+  th.innerHTML = html;
+  th.scrollTop = th.scrollHeight;
+}
+function send(){
+  const input = $('#msgInput'), text = input.value.trim();
+  const t = task(current);
+  if (!text || !t) return;
+  const tag = curTag;
+  t.notes.push({from:'you', tag, text, t:Date.now()});
+  input.value = '';
+  let reply = pick(REPLIES[tag]);
+  if (tag === 'blocker' && t.state !== 'done'){
+    nap(t, 'Blocked: ' + (text.length > 40 ? text.slice(0, 40) + '…' : text), -1);
+  } else if (tag === 'update' && t.state === 'idle'){
+    wake(t, 'got an update and woke up');
+    reply = 'Yay, I’m awake! Back to work 🌸';
+  }
+  updateLane(t); renderStats(); save();
+  renderThread(true);
+  setTimeout(() => {
+    t.notes.push({from:'char', text:reply, t:Date.now()});
+    updateLane(t); save();
+    if (current === t.id) renderThread();
+  }, 900);
+}
+
+/* ---------- events ---------- */
+$('#lanes').addEventListener('click', e => {
+  const lane = e.target.closest('.lane'); if (!lane) return;
+  const t = task(lane.dataset.id);
+  if (e.target.closest('.critter')){
+    if (t.state === 'idle'){ wake(t, 'got poked awake 👀'); poke(t, '!'); }
+    else poke(t, '♥');
+    updateLane(t); renderStats(); save(); return;
+  }
+  const act = e.target.closest('[data-act]')?.dataset.act;
+  if (act === 'bump' && t.state === 'active') moveTo(t, t.progress + 10);
+  if (act === 'pause'){
+    if (t.state === 'idle') wake(t);
+    else if (t.state === 'active') nap(t, 'Paused by you', -1);
+  }
+  if (act === 'notes') return openNotes(t.id);
+  updateLane(t); renderStats(); save();
+});
+
+$('#autoBtn').addEventListener('click', () => {
+  auto = !auto;
+  $('#autoBtn').setAttribute('aria-checked', String(auto));
+});
+$('#resetBtn').addEventListener('click', () => {
+  try { localStorage.removeItem(KEY); } catch(e){}
+  Object.keys(timers).forEach(k => { clearTimeout(timers[k]); delete timers[k]; });
+  S = seed(); renderAll();
+});
+$('#closeDrawer').addEventListener('click', closeNotes);
+$('#overlay').addEventListener('click', closeNotes);
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && current) closeNotes(); });
+$('#sendBtn').addEventListener('click', send);
+$('#msgInput').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); send(); } });
+document.querySelectorAll('.tag-btn').forEach(b => b.addEventListener('click', () => {
+  curTag = b.dataset.tag;
+  document.querySelectorAll('.tag-btn').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+}));
+
+const dlg = $('#addDialog');
+$('#fOwner').innerHTML = Object.entries(CHARS).map(([k,c]) => `<option value="${k}">${c.name} the ${c.species}</option>`).join('');
+$('#addBtn').addEventListener('click', () => { $('#addForm').reset(); dlg.showModal(); });
+$('#cancelAdd').addEventListener('click', () => dlg.close());
+$('#addForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const title = $('#fTitle').value.trim(); if (!title) return;
+  const steps = $('#fSteps').value.split('\n').map(s => s.trim()).filter(Boolean);
+  const t = {id:'t'+Date.now(), title, owner:$('#fOwner').value, cadence:$('#fCadence').value, progress:0, state:'active',
+    steps: steps.length ? steps : ['Plan it out','Do the work','Check it over','Wrap up'],
+    cycle:1, notes:[], idleReason:null, idleLeft:0, doneTicks:0, faceLeft:false};
+  S.tasks.push(t);
+  $('#lanes').appendChild(buildLane(t)); updateLane(t);
+  log(t, `picked up “${title}”`);
+  renderStats(); save(); dlg.close();
+  laneEl(t).scrollIntoView({behavior:'smooth', block:'center'});
+});
+
+/* ---------- start ---------- */
+$('#brandMark').innerHTML = critterSVG(CHARS.mimi);
+load(); renderAll();
+setInterval(() => { if (auto && !document.hidden) tick(); }, 1400);
+</script>
+</body>
+</html>
